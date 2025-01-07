@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gleich/lumber/v3"
@@ -18,11 +19,11 @@ import (
 
 type extensionQueryResponse struct {
 	Results []struct {
-		Extensions []Extension `json:"extensions"`
+		Extensions []MarketplaceExtension `json:"extensions"`
 	} `json:"results"`
 }
 
-type Extension struct {
+type MarketplaceExtension struct {
 	Publisher struct {
 		DisplayName   string `json:"displayName"`
 		PublisherName string `json:"publisherName"`
@@ -74,8 +75,8 @@ type criteria struct {
 	Value      string `json:"value"`
 }
 
-func FetchExtensions(client *http.Client) ([]Extension, error) {
-	extensions := []Extension{}
+func FetchExtensions(client *http.Client) ([]MarketplaceExtension, error) {
+	extensions := []MarketplaceExtension{}
 	for i := 1; true; i++ {
 		reqBody, err := json.Marshal(extensionQuery{
 			AssetTypes: []string{
@@ -100,7 +101,7 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			Flags: 870,
 		})
 		if err != nil {
-			return []Extension{}, fmt.Errorf("%v failed to marshal JSON body", err)
+			return []MarketplaceExtension{}, fmt.Errorf("%v failed to marshal JSON body", err)
 		}
 
 		req, err := http.NewRequest(
@@ -109,7 +110,7 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			bytes.NewBuffer(reqBody),
 		)
 		if err != nil {
-			return []Extension{}, fmt.Errorf("%v failed to make new request", err)
+			return []MarketplaceExtension{}, fmt.Errorf("%v failed to make new request", err)
 		}
 		req.Header.Add("Content-Type", "application/json;charset=utf-8")
 		req.Header.Add(
@@ -119,20 +120,20 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			return []Extension{}, fmt.Errorf("%v failed to execute request", err)
+			return []MarketplaceExtension{}, fmt.Errorf("%v failed to execute request", err)
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return []Extension{}, fmt.Errorf("%v reading response body failed", err)
+			return []MarketplaceExtension{}, fmt.Errorf("%v reading response body failed", err)
 		}
 
 		var data extensionQueryResponse
 		err = json.Unmarshal(body, &data)
 		if err != nil {
 			lumber.Debug(string(body))
-			return []Extension{}, fmt.Errorf("%v failed to parse json", err)
+			return []MarketplaceExtension{}, fmt.Errorf("%v failed to parse json", err)
 		}
 
 		if len(data.Results[0].Extensions) == 0 {
@@ -147,14 +148,16 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			"extensions. Total is at",
 			len(extensions),
 		)
-		break // just for debugging right now
-
 	}
 	return extensions, nil
 }
 
 // Downloads the extension to a temporary directory so it can be processed
-func DownloadExtension(client *http.Client, extension Extension) (string, error) {
+func DownloadExtension(
+	client *http.Client,
+	tempDir string,
+	extension MarketplaceExtension,
+) (string, error) {
 	u, err := url.JoinPath(
 		"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/",
 		extension.Publisher.PublisherName,
@@ -179,7 +182,7 @@ func DownloadExtension(client *http.Client, extension Extension) (string, error)
 		return "", err
 	}
 
-	loc := filepath.Join(os.TempDir(), "hueport", fmt.Sprintf("%s.zip", extension.ExtensionID))
+	loc := filepath.Join(tempDir, fmt.Sprintf("%s.zip", extension.ExtensionID))
 	folder := path.Dir(loc)
 
 	if _, err = os.Stat(folder); os.IsNotExist(err) {
@@ -196,16 +199,18 @@ func DownloadExtension(client *http.Client, extension Extension) (string, error)
 	return loc, nil
 }
 
-func UnzipExtension(loc string, extension Extension) error {
-	dir := path.Dir(loc)
-	err := os.Chdir(dir)
+func UnzipExtension(zipPath string, extension MarketplaceExtension) (string, error) {
+	folder := strings.TrimSuffix(zipPath, ".zip")
+	cmd := exec.Command("unzip", zipPath, "-d", folder)
+	cmd.Dir = path.Dir(zipPath)
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("%v failed to change dir to %s", err, dir)
+		return folder, fmt.Errorf(
+			"%v failed to unzip %s for %s",
+			err,
+			zipPath,
+			extension.DisplayName,
+		)
 	}
-
-	err = exec.Command("unzip", loc, "-d", extension.ExtensionID).Run()
-	if err != nil {
-		return fmt.Errorf("%v failed to unzip %s for %s", err, loc, extension.DisplayName)
-	}
-	return nil
+	return folder, nil
 }
