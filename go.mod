@@ -1,4 +1,4 @@
-module github.com/gleich/hueport-backend
+module github.com/gleich/hueport-scraper
 
 go 1.23.4
 

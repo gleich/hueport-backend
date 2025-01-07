@@ -75,7 +75,7 @@ type criteria struct {
 	Value      string `json:"value"`
 }
 
-func FetchExtensions(client *http.Client) ([]MarketplaceExtension, error) {
+func fetchExtensions(client *http.Client) ([]MarketplaceExtension, error) {
 	extensions := []MarketplaceExtension{}
 	for i := 1; true; i++ {
 		reqBody, err := json.Marshal(extensionQuery{
@@ -153,7 +153,7 @@ func FetchExtensions(client *http.Client) ([]MarketplaceExtension, error) {
 }
 
 // Downloads the extension to a temporary directory so it can be processed
-func DownloadExtension(
+func downloadExtension(
 	client *http.Client,
 	tempDir string,
 	extension MarketplaceExtension,
@@ -199,7 +199,7 @@ func DownloadExtension(
 	return loc, nil
 }
 
-func UnzipExtension(zipPath string, extension MarketplaceExtension) (string, error) {
+func unzipExtension(zipPath string, extension MarketplaceExtension) (string, error) {
 	folder := strings.TrimSuffix(zipPath, ".zip")
 	cmd := exec.Command("unzip", zipPath, "-d", folder)
 	cmd.Dir = path.Dir(zipPath)

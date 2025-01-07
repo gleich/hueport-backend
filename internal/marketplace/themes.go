@@ -37,7 +37,7 @@ type Theme struct {
 	} `json:"colors"`
 }
 
-func ExtractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) {
+func extractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) {
 	folder := filepath.Join(loc, "extension", "themes")
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
 		lumber.Warning(extension.DisplayName, "doesn't have a themes folder")

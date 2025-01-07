@@ -1,3 +1,3 @@
-# hueport backend
+# hueport scraper
 
-Backend service for hueport
+Scraper service for hueport
