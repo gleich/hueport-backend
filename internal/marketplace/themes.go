@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gleich/lumber/v3"
+	"github.com/muhammadmuzzammil1998/jsonc"
 )
 
 type Theme struct {
@@ -57,7 +58,7 @@ func ExtractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) 
 			}
 
 			var theme Theme
-			err = json.Unmarshal(bin, &theme)
+			err = json.Unmarshal(jsonc.ToJSON(bin), &theme)
 			if err != nil {
 				lumber.Warning(name, "did not contain proper json data")
 				continue

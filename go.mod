@@ -2,7 +2,10 @@ module github.com/gleich/hueport-backend
 
 go 1.23.4
 
-require github.com/gleich/lumber/v3 v3.0.2
+require (
+	github.com/gleich/lumber/v3 v3.0.2
+	github.com/muhammadmuzzammil1998/jsonc v1.0.0
+)
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
