@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,10 +19,28 @@ func main() {
 		lumber.Fatal(err)
 	}
 
-	for i, e := range extensions {
-		lumber.Debug(i, e.DisplayName)
-	}
+	for i, extension := range extensions {
+		fmt.Println()
+		lumber.Info(
+			"Processing",
+			extension.DisplayName,
+			fmt.Sprintf("(%d/%d)", i+1, len(extensions)),
+		)
+		path, err := marketplace.DownloadExtension(client, extension)
+		if err != nil {
+			lumber.Error(err, "failed to download extension")
+		}
+		lumber.Done("✔︎ Downloaded")
 
+		err = marketplace.UnzipExtension(path, extension)
+		if err != nil {
+			lumber.Error(err, "failed to unzip extension")
+		}
+		lumber.Done("✔︎ Unzipped VSIX package")
+
+		lumber.Done("Processed", extension.DisplayName)
+		break
+	}
 }
 
 func setupLogger() {

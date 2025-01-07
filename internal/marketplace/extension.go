@@ -3,8 +3,14 @@ package marketplace
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/gleich/lumber/v3"
@@ -18,7 +24,8 @@ type extensionQueryResponse struct {
 
 type Extension struct {
 	Publisher struct {
-		DisplayName string `json:"displayName"`
+		DisplayName   string `json:"displayName"`
+		PublisherName string `json:"publisherName"`
 	} `json:"publisher"`
 	ExtensionID      string    `json:"extensionId"`
 	ExtensionName    string    `json:"extensionName"`
@@ -93,8 +100,7 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			Flags: 870,
 		})
 		if err != nil {
-			lumber.Error(err, "failed to marshal JSON body")
-			return []Extension{}, err
+			return []Extension{}, fmt.Errorf("%v failed to marshal JSON body", err)
 		}
 
 		req, err := http.NewRequest(
@@ -103,8 +109,7 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			bytes.NewBuffer(reqBody),
 		)
 		if err != nil {
-			lumber.Error(err, "failed to create new request")
-			return []Extension{}, err
+			return []Extension{}, fmt.Errorf("%v failed to make new request", err)
 		}
 		req.Header.Add("Content-Type", "application/json;charset=utf-8")
 		req.Header.Add(
@@ -114,23 +119,20 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			lumber.Error(err, "failed to execute request")
-			return []Extension{}, err
+			return []Extension{}, fmt.Errorf("%v failed to execute request", err)
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			lumber.Error(err, "reading response body failed")
-			return []Extension{}, err
+			return []Extension{}, fmt.Errorf("%v reading response body failed", err)
 		}
 
 		var data extensionQueryResponse
 		err = json.Unmarshal(body, &data)
 		if err != nil {
-			lumber.Error(err, "failed to parse json")
 			lumber.Debug(string(body))
-			return []Extension{}, err
+			return []Extension{}, fmt.Errorf("%v failed to parse json", err)
 		}
 
 		if len(data.Results[0].Extensions) == 0 {
@@ -145,6 +147,65 @@ func FetchExtensions(client *http.Client) ([]Extension, error) {
 			"extensions. Total is at",
 			len(extensions),
 		)
+		break // just for debugging right now
+
 	}
 	return extensions, nil
+}
+
+// Downloads the extension to a temporary directory so it can be processed
+func DownloadExtension(client *http.Client, extension Extension) (string, error) {
+	u, err := url.JoinPath(
+		"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/",
+		extension.Publisher.PublisherName,
+		"vsextensions",
+		extension.ExtensionName, extension.Versions[0].Version, "vspackage",
+	)
+	if err != nil {
+		lumber.Error(err, "failed to URL encode for extension:", extension.DisplayName)
+		return "", err
+	}
+
+	resp, err := client.Get(u)
+	if err != nil {
+		lumber.Error(err, "failed to fetch extension", extension.DisplayName)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		lumber.Error(err, "reading response body failed")
+		return "", err
+	}
+
+	loc := filepath.Join(os.TempDir(), "hueport", fmt.Sprintf("%s.zip", extension.ExtensionID))
+	folder := path.Dir(loc)
+
+	if _, err = os.Stat(folder); os.IsNotExist(err) {
+		err = os.MkdirAll(folder, 0777)
+		if err != nil {
+			lumber.Error(err, "failed to create directory", folder)
+		}
+	}
+
+	err = os.WriteFile(loc, body, 0655)
+	if err != nil {
+		lumber.Error(err, "failed to write VSIX file")
+	}
+	return loc, nil
+}
+
+func UnzipExtension(loc string, extension Extension) error {
+	dir := path.Dir(loc)
+	err := os.Chdir(dir)
+	if err != nil {
+		return fmt.Errorf("%v failed to change dir to %s", err, dir)
+	}
+
+	err = exec.Command("unzip", loc, "-d", extension.ExtensionID).Run()
+	if err != nil {
+		return fmt.Errorf("%v failed to unzip %s for %s", err, loc, extension.DisplayName)
+	}
+	return nil
 }
