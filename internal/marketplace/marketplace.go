@@ -2,6 +2,7 @@ package marketplace
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ func ProcessExtensions(client *http.Client) {
 	tempDir := resetProcessingFolder()
 
 	for i, marketplaceExtension := range marketplaceExtensions {
-		fmt.Println()
+		log.Println()
 		lumber.Info(
 			"Processing",
 			marketplaceExtension.DisplayName,
@@ -45,7 +46,7 @@ func ProcessExtensions(client *http.Client) {
 		}
 
 		lumber.Done("✔︎ Extracted", len(themes), "themes")
-		lumber.Done("Finished Processed", marketplaceExtension.DisplayName)
+		lumber.Done("Finished processing", marketplaceExtension.DisplayName)
 		resetProcessingFolder()
 	}
 }

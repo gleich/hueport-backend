@@ -13,7 +13,11 @@ func main() {
 	lumber.Info("booted")
 
 	client := http.DefaultClient
-	marketplace.ProcessExtensions(client)
+
+	for {
+		marketplace.ProcessExtensions(client)
+		time.Sleep(5 * time.Minute)
+	}
 }
 
 func setupLogger() {
