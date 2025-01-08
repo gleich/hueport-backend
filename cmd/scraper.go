@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gleich/hueport-scraper/internal/db"
 	"github.com/gleich/hueport-scraper/internal/marketplace"
 	"github.com/gleich/lumber/v3"
 )
@@ -12,10 +13,11 @@ func main() {
 	setupLogger()
 	lumber.Info("booted")
 
+	database := db.Connect()
 	client := http.DefaultClient
 
 	for {
-		marketplace.ProcessExtensions(client)
+		marketplace.ProcessExtensions(client, database)
 		time.Sleep(5 * time.Minute)
 	}
 }

@@ -1,16 +1,18 @@
 package marketplace
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/gleich/hueport-scraper/internal/db"
 	"github.com/gleich/lumber/v3"
+	"gorm.io/gorm"
 )
 
-func ProcessExtensions(client *http.Client) {
+func ProcessExtensions(client *http.Client, database *gorm.DB) {
 	marketplaceExtensions, err := fetchExtensions(client)
 	if err != nil {
 		lumber.Fatal(err)
@@ -19,7 +21,14 @@ func ProcessExtensions(client *http.Client) {
 	tempDir := resetProcessingFolder()
 
 	for i, marketplaceExtension := range marketplaceExtensions {
-		log.Println()
+		// check to make sure that extension doesn't already exist
+		var extension db.Extension
+		result := database.First(&extension, "extension_id = ?", marketplaceExtension.ExtensionID)
+		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			continue
+		}
+
+		fmt.Println()
 		lumber.Info(
 			"Processing",
 			marketplaceExtension.DisplayName,
@@ -46,6 +55,17 @@ func ProcessExtensions(client *http.Client) {
 		}
 
 		lumber.Done("✔︎ Extracted", len(themes), "themes")
+
+		database.Create(
+			&db.Extension{
+				ExtensionID: marketplaceExtension.ExtensionID,
+				Name:        marketplaceExtension.DisplayName,
+				LastUpdated: marketplaceExtension.LastUpdated,
+			},
+		)
+
+		lumber.Done("✔︎ Created", marketplaceExtension.DisplayName, "in database")
+
 		lumber.Done("Finished processing", marketplaceExtension.DisplayName)
 		resetProcessingFolder()
 	}
