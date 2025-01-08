@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gleich/hueport-scraper/internal/db"
-	"github.com/gleich/hueport-scraper/internal/marketplace"
 	"github.com/gleich/lumber/v3"
+	"pkg.mattglei.ch/hueport-scraper/internal/db"
+	"pkg.mattglei.ch/hueport-scraper/internal/marketplace"
 )
 
 func main() {

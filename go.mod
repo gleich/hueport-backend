@@ -1,4 +1,4 @@
-module github.com/gleich/hueport-scraper
+module pkg.mattglei.ch/hueport-scraper
 
 go 1.23.4
 

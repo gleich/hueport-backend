@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gleich/hueport-scraper/internal/db"
 	"github.com/gleich/lumber/v3"
 	"gorm.io/gorm"
+	"pkg.mattglei.ch/hueport-scraper/internal/db"
 )
 
 func ProcessExtensions(client *http.Client, database *gorm.DB) {
