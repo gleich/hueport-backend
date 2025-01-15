@@ -3,10 +3,10 @@ package db
 import (
 	"os"
 
-	"github.com/gleich/lumber/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"pkg.mattglei.ch/timber"
 )
 
 func Connect() *gorm.DB {
@@ -14,14 +14,14 @@ func Connect() *gorm.DB {
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
-		lumber.Fatal(err, "failed to connect to database")
+		timber.Fatal(err, "failed to connect to database")
 	}
 
 	err = db.AutoMigrate(&Extension{})
 	if err != nil {
-		lumber.Fatal(err, "failed to run migration for extension")
+		timber.Fatal(err, "failed to run migration for extension")
 	}
 
-	lumber.Done("connected to database")
+	timber.Done("connected to database")
 	return db
 }

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/muhammadmuzzammil1998/jsonc"
+	"pkg.mattglei.ch/timber"
 )
 
 type Theme struct {
@@ -40,7 +40,7 @@ type Theme struct {
 func extractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) {
 	folder := filepath.Join(loc, "extension", "themes")
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
-		lumber.Warning(extension.DisplayName, "doesn't have a themes folder")
+		timber.Warning(extension.DisplayName, "doesn't have a themes folder")
 		return []Theme{}, nil
 	}
 	entries, err := os.ReadDir(folder)
@@ -60,7 +60,7 @@ func extractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) 
 			var theme Theme
 			err = json.Unmarshal(jsonc.ToJSON(bin), &theme)
 			if err != nil {
-				lumber.Warning(name, "did not contain proper json data")
+				timber.Warning(name, "did not contain proper json data")
 				continue
 			}
 			themes = append(themes, theme)

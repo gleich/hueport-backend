@@ -3,17 +3,17 @@ module pkg.mattglei.ch/hueport-scraper
 go 1.23.4
 
 require (
-	github.com/gleich/lumber/v3 v3.0.2
 	github.com/joho/godotenv v1.5.1
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
+	pkg.mattglei.ch/timber v1.0.0
 )
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
-	github.com/charmbracelet/x/ansi v0.6.0 // indirect
+	github.com/charmbracelet/x/ansi v0.7.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.2 // indirect

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gleich/lumber/v3"
+	"pkg.mattglei.ch/timber"
 )
 
 type extensionQueryResponse struct {
@@ -132,17 +132,17 @@ func fetchExtensions(client *http.Client) ([]MarketplaceExtension, error) {
 		var data extensionQueryResponse
 		err = json.Unmarshal(body, &data)
 		if err != nil {
-			lumber.Debug(string(body))
+			timber.Debug(string(body))
 			return []MarketplaceExtension{}, fmt.Errorf("%v failed to parse json", err)
 		}
 
 		if len(data.Results[0].Extensions) == 0 {
-			lumber.Done("Finished fetching all extensions")
+			timber.Done("Finished fetching all extensions")
 			break
 		}
 
 		extensions = append(extensions, data.Results[0].Extensions...)
-		lumber.Done(
+		timber.Done(
 			"Fetched",
 			len(data.Results[0].Extensions),
 			"extensions. Total is at",
@@ -165,20 +165,20 @@ func downloadExtension(
 		extension.ExtensionName, extension.Versions[0].Version, "vspackage",
 	)
 	if err != nil {
-		lumber.Error(err, "failed to URL encode for extension:", extension.DisplayName)
+		timber.Error(err, "failed to URL encode for extension:", extension.DisplayName)
 		return "", err
 	}
 
 	resp, err := client.Get(u)
 	if err != nil {
-		lumber.Error(err, "failed to fetch extension", extension.DisplayName)
+		timber.Error(err, "failed to fetch extension", extension.DisplayName)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		lumber.Error(err, "reading response body failed")
+		timber.Error(err, "reading response body failed")
 		return "", err
 	}
 
@@ -188,13 +188,13 @@ func downloadExtension(
 	if _, err = os.Stat(folder); os.IsNotExist(err) {
 		err = os.MkdirAll(folder, 0777)
 		if err != nil {
-			lumber.Error(err, "failed to create directory", folder)
+			timber.Error(err, "failed to create directory", folder)
 		}
 	}
 
 	err = os.WriteFile(loc, body, 0655)
 	if err != nil {
-		lumber.Error(err, "failed to write VSIX file")
+		timber.Error(err, "failed to write VSIX file")
 	}
 	return loc, nil
 }
