@@ -23,6 +23,7 @@ func main() {
 	client := http.DefaultClient
 
 	for {
+		timber.Info("Starting cycle")
 		marketplace.ProcessExtensions(client, database)
 		time.Sleep(100 * time.Hour)
 	}
