@@ -5,11 +5,17 @@ import (
 	"time"
 
 	"github.com/gleich/lumber/v3"
+	"github.com/joho/godotenv"
 	"pkg.mattglei.ch/hueport-scraper/internal/db"
 	"pkg.mattglei.ch/hueport-scraper/internal/marketplace"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		lumber.Fatal(err, "Failed to load environment variables")
+	}
+
 	setupLogger()
 	lumber.Info("booted")
 

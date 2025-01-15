@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/gleich/lumber/v3 v3.0.2
+	github.com/joho/godotenv v1.5.1
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12

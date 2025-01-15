@@ -1,6 +1,8 @@
 package db
 
 import (
+	"os"
+
 	"github.com/gleich/lumber/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -8,8 +10,7 @@ import (
 )
 
 func Connect() *gorm.DB {
-	dsn := "host=localhost user=myuser password=mypassword dbname=mydatabase port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(os.Getenv("POSTGRES_DSN")), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
