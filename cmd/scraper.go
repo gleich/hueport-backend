@@ -24,7 +24,7 @@ func main() {
 
 	for {
 		marketplace.ProcessExtensions(client, database)
-		time.Sleep(5 * time.Minute)
+		time.Sleep(100 * time.Hour)
 	}
 }
 
