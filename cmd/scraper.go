@@ -22,11 +22,7 @@ func main() {
 	database := db.Connect()
 	client := http.DefaultClient
 
-	for {
-		timber.Info("Starting cycle")
-		marketplace.ProcessExtensions(client, database)
-		time.Sleep(100 * time.Hour)
-	}
+	marketplace.ProcessExtensions(client, database)
 }
 
 func setupLogger() {

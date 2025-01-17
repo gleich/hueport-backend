@@ -10,5 +10,6 @@ type Extension struct {
 	gorm.Model
 	Name        string
 	ExtensionID string
+	Themes      int
 	LastUpdated time.Time
 }

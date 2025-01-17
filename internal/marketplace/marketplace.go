@@ -21,19 +21,21 @@ func ProcessExtensions(client *http.Client, database *gorm.DB) {
 	tempDir := resetProcessingFolder()
 
 	for i, marketplaceExtension := range marketplaceExtensions {
+		progress := fmt.Sprintf("(%d/%d)", i+1, len(marketplaceExtensions))
 		// check to make sure that extension doesn't already exist
 		var extension db.Extension
 		result := database.First(&extension, "extension_id = ?", marketplaceExtension.ExtensionID)
-		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			timber.Fatal(result.Error, "failed to get extension from database")
+		}
+
+		if !errors.Is(result.Error, gorm.ErrRecordNotFound) && extension.Themes == 0 ||
+			marketplaceExtension.LastUpdated.Equal(extension.LastUpdated) {
 			continue
 		}
 
 		fmt.Println()
-		timber.Info(
-			"Processing",
-			marketplaceExtension.DisplayName,
-			fmt.Sprintf("(%d/%d)", i+1, len(marketplaceExtensions)),
-		)
+		timber.Info("Processing", marketplaceExtension.DisplayName, progress)
 		zipPath, err := downloadExtension(client, tempDir, marketplaceExtension)
 		if err != nil {
 			timber.Error(err, "failed to download extension")
@@ -61,13 +63,14 @@ func ProcessExtensions(client *http.Client, database *gorm.DB) {
 				ExtensionID: marketplaceExtension.ExtensionID,
 				Name:        marketplaceExtension.DisplayName,
 				LastUpdated: marketplaceExtension.LastUpdated,
+				Themes:      len(themes),
 			},
 		)
-
 		timber.Done("✔︎ Created", marketplaceExtension.DisplayName, "in database")
 
 		timber.Done("Finished processing", marketplaceExtension.DisplayName)
 		resetProcessingFolder()
+		fmt.Println()
 	}
 }
 
