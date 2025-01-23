@@ -22,7 +22,10 @@ func main() {
 	database := db.Connect()
 	client := http.DefaultClient
 
-	marketplace.ProcessExtensions(client, database)
+	for {
+		marketplace.ProcessExtensions(client, database)
+		time.Sleep(5 * time.Minute)
+	}
 }
 
 func setupLogger() {

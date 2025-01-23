@@ -41,8 +41,6 @@ func ProcessExtensions(client *http.Client, database *gorm.DB) {
 
 	var wg sync.WaitGroup
 
-	processedCount := 0
-	var processCountMutex sync.Mutex
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func() {
@@ -52,14 +50,6 @@ func ProcessExtensions(client *http.Client, database *gorm.DB) {
 				if err != nil {
 					timber.Error(err)
 				}
-				processCountMutex.Lock()
-				processedCount++
-				timber.Done(
-					"Processed",
-					extension.DisplayName,
-					fmt.Sprintf("%v/%v", processedCount, len(extensions)),
-				)
-				processCountMutex.Unlock()
 			}
 		}()
 	}
@@ -126,6 +116,7 @@ func processExtension(
 		if result.Error != nil {
 			return fmt.Errorf("%v failed to create extension in database", result.Error)
 		}
+		timber.Done("created", extension.Name)
 	} else {
 		dbExtension.LastUpdated = extension.LastUpdated
 		dbExtension.Themes = extension.Themes
@@ -134,6 +125,7 @@ func processExtension(
 		if result.Error != nil {
 			timber.Error(result.Error, "failed to update extension")
 		}
+		timber.Done("updated", extension.Name)
 	}
 
 	return nil
