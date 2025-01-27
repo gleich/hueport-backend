@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"pkg.mattglei.ch/hueport-scraper/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -17,7 +18,7 @@ func Connect() *gorm.DB {
 		timber.Fatal(err, "failed to connect to database")
 	}
 
-	err = db.AutoMigrate(&Extension{})
+	err = db.AutoMigrate(&models.Extension{})
 	if err != nil {
 		timber.Fatal(err, "failed to run migration for extension")
 	}

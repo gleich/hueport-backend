@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"gorm.io/gorm"
-	"pkg.mattglei.ch/hueport-scraper/internal/db"
+	"pkg.mattglei.ch/hueport-scraper/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -82,7 +82,7 @@ func processExtension(
 	marketplaceExtension MarketplaceExtension,
 	database *gorm.DB,
 ) (ProcessType, error) {
-	var dbExtension db.Extension
+	var dbExtension models.Extension
 	result := database.First(
 		&dbExtension,
 		"extension_id = ?",
@@ -123,7 +123,7 @@ func processExtension(
 		return -1, fmt.Errorf("%v failed to remove zip file", err)
 	}
 
-	extension := db.Extension{
+	extension := models.Extension{
 		ExtensionID: marketplaceExtension.ExtensionID,
 		Name:        marketplaceExtension.DisplayName,
 		LastUpdated: marketplaceExtension.LastUpdated,

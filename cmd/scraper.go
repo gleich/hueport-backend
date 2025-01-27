@@ -13,7 +13,7 @@ import (
 
 const TIME_FORMAT = "01/02 03:04:05 PM MST"
 
-var NEW_YORK_TIME *time.Location
+var newYork *time.Location
 
 func main() {
 	err := godotenv.Load()
@@ -35,7 +35,7 @@ func main() {
 		timber.Done("Updated", updated, "extensions")
 		timber.Info(
 			"Next cycle will be at",
-			time.Now().In(NEW_YORK_TIME).Add(cycleRate).Format(TIME_FORMAT),
+			time.Now().In(newYork).Add(cycleRate).Format(TIME_FORMAT),
 		)
 		time.Sleep(cycleRate)
 	}
@@ -46,7 +46,7 @@ func setupLogger() {
 	if err != nil {
 		timber.Fatal(err, "failed to load new york timezone")
 	}
-	NEW_YORK_TIME = nytime
+	newYork = nytime
 	timber.SetTimezone(nytime)
 	timber.SetTimeFormat(TIME_FORMAT)
 }
