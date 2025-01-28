@@ -27,7 +27,7 @@ func main() {
 	database := db.Connect()
 	client := http.DefaultClient
 
-	cycleRate := 5 * time.Minute
+	cycleRate := 15 * time.Minute
 	for {
 		fmt.Println()
 		created, updated := marketplace.ProcessExtensions(client, database)
