@@ -94,7 +94,7 @@ func processExtension(
 		return -1, fmt.Errorf("%v failed to get extension from database", result.Error)
 	}
 	// skipping extension if it has no themes or hasn't be updated
-	if !new && dbExtension.Themes == 0 ||
+	if !new && len(dbExtension.Themes) == 0 ||
 		marketplaceExtension.LastUpdated.Equal(dbExtension.LastUpdated) {
 		return -1, nil
 	}
@@ -127,7 +127,7 @@ func processExtension(
 		ExtensionID: marketplaceExtension.ExtensionID,
 		Name:        marketplaceExtension.DisplayName,
 		LastUpdated: marketplaceExtension.LastUpdated,
-		Themes:      len(themes),
+		Themes:      themes,
 	}
 
 	if new {

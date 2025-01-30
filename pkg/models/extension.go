@@ -9,7 +9,7 @@ import (
 type Extension struct {
 	gorm.Model
 	Name        string
-	ExtensionID string
-	Themes      int
+	ExtensionID string `gorm:"uniqueIndex"`
 	LastUpdated time.Time
+	Themes      []Theme `gorm:"foreignKey:ExtensionID;references:ExtensionID"`
 }

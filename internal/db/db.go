@@ -18,9 +18,9 @@ func Connect() *gorm.DB {
 		timber.Fatal(err, "failed to connect to database")
 	}
 
-	err = db.AutoMigrate(&models.Extension{})
+	err = db.AutoMigrate(&models.Extension{}, &models.Theme{})
 	if err != nil {
-		timber.Fatal(err, "failed to run migration for extension")
+		timber.Fatal(err, "failed to run migration for extension and theme")
 	}
 
 	timber.Done("connected to database")

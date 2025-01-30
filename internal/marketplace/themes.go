@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/muhammadmuzzammil1998/jsonc"
+	"pkg.mattglei.ch/hueport-scraper/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -15,6 +16,7 @@ type Theme struct {
 	Name   string `json:"name"`
 	Colors struct {
 		Foreground        string `json:"terminal.foreground"`
+		Background        string `json:"terminal.background"`
 		TabActiveBorder   string `json:"terminal.tab.activeBorder"`
 		CursorBackground  string `json:"terminalCursor.background"`
 		CursorForeground  string `json:"terminalCursor.foreground"`
@@ -37,18 +39,18 @@ type Theme struct {
 	} `json:"colors"`
 }
 
-func extractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) {
+func extractThemes(loc string, extension MarketplaceExtension) ([]models.Theme, error) {
 	folder := filepath.Join(loc, "extension", "themes")
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
 		timber.Warning(extension.DisplayName, "doesn't have a themes folder")
-		return []Theme{}, nil
+		return []models.Theme{}, nil
 	}
 	entries, err := os.ReadDir(folder)
 	if err != nil {
 		return nil, fmt.Errorf("%v failed to get file system entries from %s", err, folder)
 	}
 
-	themes := []Theme{}
+	themes := []models.Theme{}
 	for _, e := range entries {
 		name := e.Name()
 		if !e.IsDir() && strings.HasSuffix(strings.ToLower(name), ".json") {
@@ -63,7 +65,28 @@ func extractThemes(loc string, extension MarketplaceExtension) ([]Theme, error) 
 				timber.Warning(name, "did not contain proper json data")
 				continue
 			}
-			themes = append(themes, theme)
+			themes = append(themes, models.Theme{
+				Name:          theme.Name,
+				ExtensionID:   extension.ExtensionID,
+				Foreground:    theme.Colors.Foreground,
+				Background:    theme.Colors.Background,
+				BrightWhite:   theme.Colors.AnsiBrightWhite,
+				White:         theme.Colors.AnsiWhite,
+				BrightBlack:   theme.Colors.AnsiBrightBlack,
+				Black:         theme.Colors.AnsiBlack,
+				BrightBlue:    theme.Colors.AnsiBrightBlue,
+				Blue:          theme.Colors.AnsiBlue,
+				BrightGreen:   theme.Colors.AnsiBrightGreen,
+				Green:         theme.Colors.AnsiGreen,
+				BrightCyan:    theme.Colors.AnsiBrightCyan,
+				Cyan:          theme.Colors.AnsiCyan,
+				BrightRed:     theme.Colors.AnsiBrightRed,
+				Red:           theme.Colors.AnsiRed,
+				BrightMagenta: theme.Colors.AnsiBrightMagenta,
+				Magenta:       theme.Colors.AnsiMagenta,
+				BrightYellow:  theme.Colors.AnsiBrightYellow,
+				Yellow:        theme.Colors.AnsiYellow,
+			})
 		}
 	}
 	return themes, nil
