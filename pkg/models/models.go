@@ -1,12 +1,22 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type Extension struct {
+	ExtensionID string `gorm:"primaryKey"`
+	Name        string
+	LastUpdated time.Time
+	Themes      []Theme
+}
 
 type Theme struct {
 	gorm.Model
 	Name          string
 	ExtensionID   string
-	Extension     Extension `gorm:"foreignKey:ExtensionID;references:ExtensionID"`
 	Foreground    string
 	Background    string
 	BrightWhite   string

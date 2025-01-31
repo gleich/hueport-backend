@@ -67,7 +67,6 @@ func extractThemes(loc string, extension MarketplaceExtension) ([]models.Theme, 
 			}
 			themes = append(themes, models.Theme{
 				Name:          theme.Name,
-				ExtensionID:   extension.ExtensionID,
 				Foreground:    theme.Colors.Foreground,
 				Background:    theme.Colors.Background,
 				BrightWhite:   theme.Colors.AnsiBrightWhite,
