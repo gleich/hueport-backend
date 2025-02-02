@@ -10,13 +10,12 @@ type Extension struct {
 	ExtensionID string `gorm:"primaryKey"`
 	Name        string
 	LastUpdated time.Time
-	Themes      []Theme
+	Themes      []Theme `gorm:"many2many:extension_themes;"`
 }
 
 type Theme struct {
 	gorm.Model
 	Name          string
-	ExtensionID   string
 	Foreground    string
 	Background    string
 	BrightWhite   string
