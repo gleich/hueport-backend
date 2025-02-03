@@ -7,6 +7,7 @@ import (
 )
 
 type Extension struct {
+	gorm.Model
 	ExtensionID string `gorm:"primaryKey"`
 	Name        string
 	LastUpdated time.Time

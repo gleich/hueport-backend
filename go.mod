@@ -1,13 +1,13 @@
 module pkg.mattglei.ch/hueport-scraper
 
-go 1.23.4
+go 1.23.5
 
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
-	pkg.mattglei.ch/timber v1.0.1
+	pkg.mattglei.ch/timber v1.1.0
 )
 
 require (
@@ -24,7 +24,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
