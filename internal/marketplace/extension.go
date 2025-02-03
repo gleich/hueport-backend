@@ -1,6 +1,7 @@
 package marketplace
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -201,16 +201,80 @@ func downloadExtension(
 
 func unzipExtension(zipPath string, extension MarketplaceExtension) (string, error) {
 	folder := strings.TrimSuffix(zipPath, ".zip")
-	cmd := exec.Command("unzip", zipPath, "-d", folder)
-	cmd.Dir = path.Dir(zipPath)
-	err := cmd.Run()
-	if err != nil {
+
+	if err := os.MkdirAll(folder, 0755); err != nil {
 		return folder, fmt.Errorf(
-			"%v failed to unzip %s for %s",
-			err,
-			zipPath,
+			"failed to create folder %s for %s: %w",
+			folder,
 			extension.DisplayName,
+			err,
 		)
 	}
+	r, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return folder, fmt.Errorf(
+			"failed to open zip %s for %s: %w",
+			zipPath,
+			extension.DisplayName,
+			err,
+		)
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		fpath := filepath.Join(folder, f.Name)
+		if !strings.HasPrefix(
+			filepath.Clean(fpath),
+			filepath.Clean(folder)+string(os.PathSeparator),
+		) {
+			return folder, fmt.Errorf("illegal file path: %s", fpath)
+		}
+		if f.FileInfo().IsDir() {
+			if err := os.MkdirAll(fpath, f.Mode()); err != nil {
+				return folder, fmt.Errorf(
+					"failed to create directory %s for %s: %w",
+					fpath,
+					extension.DisplayName,
+					err,
+				)
+			}
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(fpath), 0755); err != nil {
+			return folder, fmt.Errorf("failed to create directory for %s: %w", fpath, err)
+		}
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return folder, fmt.Errorf(
+				"failed to open file %s for writing for %s: %w",
+				fpath,
+				extension.DisplayName,
+				err,
+			)
+		}
+		rc, err := f.Open()
+		if err != nil {
+			outFile.Close()
+			return folder, fmt.Errorf(
+				"failed to open zip entry %s for %s: %w",
+				f.Name,
+				extension.DisplayName,
+				err,
+			)
+		}
+		if _, err := io.Copy(outFile, rc); err != nil {
+			rc.Close()
+			outFile.Close()
+			return folder, fmt.Errorf(
+				"failed to write file %s for %s: %w",
+				fpath,
+				extension.DisplayName,
+				err,
+			)
+		}
+		rc.Close()
+		outFile.Close()
+	}
+
 	return folder, nil
 }
