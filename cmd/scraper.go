@@ -27,16 +27,16 @@ func main() {
 	database := db.Connect()
 	client := http.DefaultClient
 
-	cycleRate := 15 * time.Minute
+	cycleRate := 1 * time.Hour
 	for {
 		fmt.Println()
 		start := time.Now()
 		created, updated := marketplace.ProcessExtensions(client, database)
-		timber.Debug("Cycle took", time.Since(start))
-		timber.Done("Loaded in", created, "extensions")
-		timber.Done("Updated", updated, "extensions")
+		timber.Info("cycle took", time.Since(start))
+		timber.Done("loaded in", created, "extensions")
+		timber.Done("updated", updated, "extensions")
 		timber.Info(
-			"Next cycle will be at",
+			"next cycle will be at",
 			time.Now().In(newYork).Add(cycleRate).Format(TIME_FORMAT),
 		)
 		time.Sleep(cycleRate)
