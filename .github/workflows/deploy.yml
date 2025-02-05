@@ -11,12 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u gleich --password-stdin
-          docker build -t ghcr.io/gleich/hueport-scraper .
-          docker push ghcr.io/gleich/hueport-scraper
+          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login docker.mattglei.ch -u gleich --password-stdin
+          docker build -t docker.mattglei.ch/gleich/hueport-scraper .
+          docker push docker.mattglei.ch/gleich/hueport-scraper
       - uses: caprover/deploy-from-github@v1.1.2
         with:
           server: https://dev.mattglei.ch
           app: hueport-scraper
           token: '${{ secrets.CAPROVER_APP_TOKEN }}'
-          image: ghcr.io/gleich/hueport-scraper
+          image: docker.mattglei.ch/gleich/hueport-scraper
