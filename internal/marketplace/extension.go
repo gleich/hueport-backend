@@ -165,21 +165,22 @@ func downloadExtension(
 		extension.ExtensionName, extension.Versions[0].Version, "vspackage",
 	)
 	if err != nil {
-		timber.Error(err, "failed to URL encode for extension:", extension.DisplayName)
-		return "", err
+		return "", fmt.Errorf(
+			"%v failed to URL encode for extension: %s",
+			err,
+			extension.DisplayName,
+		)
 	}
 
 	resp, err := client.Get(u)
 	if err != nil {
-		timber.Error(err, "failed to fetch extension", extension.DisplayName)
-		return "", err
+		return "", fmt.Errorf("%v failed to fetch extension %s", err, extension.DisplayName)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		timber.Error(err, "reading response body failed")
-		return "", err
+		return "", fmt.Errorf("%v reading response body failed", err)
 	}
 
 	loc := filepath.Join(tempDir, fmt.Sprintf("%s.zip", extension.ExtensionID))
@@ -188,13 +189,13 @@ func downloadExtension(
 	if _, err = os.Stat(folder); os.IsNotExist(err) {
 		err = os.MkdirAll(folder, 0777)
 		if err != nil {
-			timber.Error(err, "failed to create directory", folder)
+			return "", fmt.Errorf("%v failed to create directory", err)
 		}
 	}
 
 	err = os.WriteFile(loc, body, 0655)
 	if err != nil {
-		timber.Error(err, "failed to write VSIX file")
+		return "", fmt.Errorf("%v failed to write VSIX file", err)
 	}
 	return loc, nil
 }

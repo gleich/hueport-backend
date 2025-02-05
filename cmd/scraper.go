@@ -30,7 +30,9 @@ func main() {
 	cycleRate := 15 * time.Minute
 	for {
 		fmt.Println()
+		start := time.Now()
 		created, updated := marketplace.ProcessExtensions(client, database)
+		timber.Debug("Cycle took", time.Since(start))
 		timber.Done("Loaded in", created, "extensions")
 		timber.Done("Updated", updated, "extensions")
 		timber.Info(
