@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login docker.mattglei.ch -u gleich --password-stdin
+          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login docker.mattglei.ch -u admin --password-stdin
           docker build -t docker.mattglei.ch/gleich/hueport-scraper .
           docker push docker.mattglei.ch/gleich/hueport-scraper
       - uses: caprover/deploy-from-github@v1.1.2
